@@ -1,10 +1,13 @@
-=== TBTestimonials ===
-Contributors: ansimation
+=== TBTestimonials-V2 ===
+Contributors: vin901, ansimation
 Donate link: http://visitfloridastateparks.com/donate/
 Tags: testimonial, testimonials, quote, quotes, business, client, customer, testimony, reference, ajax, widget, testimonial widget, custom post type
 Requires at least: 3.0
 Tested up to: 3.4
 Stable tag: 1.6.1
+Requires PHP: 7.0
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 Testimonial Management done right with Custom Post Types. Supports a testimonial.php template file for single testimonial pages. Testimonial Shortcode to insert testimonials in any post or page. Animated Sidebar Widget, Built in documentation and code examples. Customize output and tons of other options!
 
@@ -162,3 +165,9 @@ This section describes how to install the plugin and get it working.
 
 = 1.0 =
 * Initial Import of plugin
+
+
+== Upgrade Notice ==
+
+= 1.6.1 =
+* Works with WordPress 6.1.1
