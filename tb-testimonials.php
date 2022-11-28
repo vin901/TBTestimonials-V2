@@ -2,8 +2,8 @@
 /**
 *   Plugin Name: TB Testimonials
 *   Plugin URI: http://travisballard.com/wordpress/tb-testimonials/
-*   Description: Testimonials managed by Custom Post Types. Supports a testimonial.php template file for single testimonial pages. Testimonial Shortcode to insert testimonials in any post. Scrolling Sidebar Widget
-*   Version: 1.6.1
+*   Description: Powerful Testimonial Management. Create and use custom Output Templates anywhere on your site. Use the shortcode, function, or included widget to display your testimonials to your users.
+*   Version: 1.7.3
 *   Author: Travis Ballard
 *   Author URI: http://www.travisballard.com
 *
@@ -40,6 +40,7 @@ class TBTestimonials
             $css_path = 'inc/css/',
             $js_path = 'inc/js/',
             $post_type = 'testimonial',
+            $shortcode = 'testimonial',
             $load_js_in_footer = false;
 
     /**
@@ -89,11 +90,6 @@ class TBTestimonials
         # menu items
         add_action( 'admin_menu', array( &$this, 'add_menus' ) );
 
-        # shortcodes
-        add_action('wp_ajax_tbtestimonials-shortcode', array( &$this, 'shortcode_window' ) );
-        add_shortcode( apply_filters( 'tbt_testimonial_shortcode', 'testimonial' ), array( &$this, 'shortcode' ) );
-        add_shortcode( 'testimonial_form', array( &$this, 'testimonial_form' ) );
-
         # image sizes
         add_image_size( 'tbtestimonial_admin_thumbnail', 40, 40, 1 );
         add_image_size( 'tbtestimonial_thumbnail', $this->settings['gravatar_size'], $this->settings['gravatar_size'], 1 );
@@ -101,40 +97,31 @@ class TBTestimonials
         # listing formatting. - Special thanks to Mark Haller @ LogicSpot.com for this
         add_filter( 'manage_edit-testimonial_columns', array( &$this, 'testimonial_listing_edit_columns' ) );
         add_action( 'manage_pages_custom_column', array( &$this, 'testimonial_listing_columns' ) );
-
-        /**
-        *   nag about new template api
-        */
-        if( ! isset( $this->settings['use_template_api'] ) && ! get_option( 'tbt_template_nag_shown' ) )
-        {
-            add_action( 'admin_notices', array( &$this, 'template_api_nag' ) );
-            add_option( 'tbt_template_nag_shown', time() );
-        }
-        else if( ! isset( $this->settings['use_template_api'] ) && $time = get_option( 'tbt_template_nag_shown' ) )
-        {
-            if( $time <= strtotime( '-1 week' ) ){
-                add_action( 'admin_notices', array( &$this, 'template_api_nag' ) );
-                update_option( 'tbt_template_nag_shown', time() );
-            }
-        }
     }
 
-    public function template_api_nag(){
-        printf( '<div class="updated fade"><p>There is a new Template API available in TBTestimonials. You should switch to it before the next update cause it\'s totally worth it and you\'ll love it. <a href="%s">Let\'s do it!</a></p></div>', admin_url( 'edit.php?post_type=testimonial&page=tbtestimonials-settings' ) );
+    /**
+    * register shortcodes
+    *
+    */
+    public function add_shortcodes()
+    {
+        add_action('wp_ajax_tbtestimonials-shortcode', array( &$this, 'shortcode_window' ) );
+        add_shortcode( apply_filters( 'tbtestimonials_shortcode', $this->shortcode ), array( &$this, 'shortcode' ) );
     }
 
     /**
     * init funcitons. register scripts, styles, taxonomies and post types
     *
     */
-    function init()
+    public function init()
     {
         $this->register_scripts();
         $this->register_styles();
+        $this->add_shortcodes();
 
         # add testimonial post type
         register_post_type(
-            $this->post_type,
+            apply_filters( 'tbtestimonials_post_type', $this->post_type ),
             array(
                 'labels' => array(
                     'name' => 'Testimonials',
@@ -170,7 +157,7 @@ class TBTestimonials
         # testimonial category taxonomy
         register_taxonomy(
             'tbtestimonial_category',
-            array( 'testimonial' ),
+            array( apply_filters( 'tbtestimonials_post_type', $this->post_type ) ),
             array(
                 'hierarchical' => true,
                 'show_ui' => true,
@@ -198,9 +185,11 @@ class TBTestimonials
     */
     function add_menus()
     {
-        add_submenu_page( 'edit.php?post_type=testimonial', 'TBTestimonials Settings', 'General Settings', 'manage_options', 'tbtestimonials-settings', array( &$this, 'settings_page' ) );
-        $output_syntax_page = add_submenu_page( 'edit.php?post_type=testimonial', 'TBTestimonials Output Syntax Settings', 'Output Settings', 'manage_options', 'tbtestimonials-syntax-settings', array( &$this, 'syntax_page' ) );
-        $documentation_page = add_submenu_page( 'edit.php?post_type=testimonial', 'TBTestimonials Documentation', 'Documentation', 'manage_options', 'tbtestimonials-documentation', array( &$this, 'documentation_page' ) );
+        $post_type = apply_filters( 'tbtestimonials_post_type', $this->post_type );
+        add_submenu_page( sprintf( 'edit.php?post_type=%s', $post_type ), 'TB-Testimonials Settings', 'General Settings', 'manage_options', 'tbtestimonials-settings', array( &$this, 'settings_page' ) );
+        $output_syntax_page = add_submenu_page( sprintf( 'edit.php?post_type=%s', $post_type ), 'TB-Testimonials Output Templates', 'Output Templates', 'manage_options', 'tbtestimonials-output-templates', array( &$this, 'syntax_page' ) );
+        $documentation_page = add_submenu_page( sprintf( 'edit.php?post_type=%s', $post_type ), 'TB-Testimonials Documentation', 'Documentation', 'manage_options', 'tbtestimonials-documentation', array( &$this, 'documentation_page' ) );
+        /*$import__page = add_submenu_page( sprintf( 'edit.php?post_type=%s', $post_type ), 'Import Testimonials', 'Import', 'manage_options', 'tbtestimonials-import-testimonials', array( &$this, 'import_testimonials_page' ) );*/
         add_action( 'admin_print_scripts-' . $output_syntax_page, create_function( '', 'wp_enqueue_script("CodeMirror");') );
         add_action( 'admin_print_scripts-' . $documentation_page, array( &$this, 'load_documentation_scripts' ) );
         add_action( 'admin_print_scripts-' . $output_syntax_page, array( &$this, 'load_documentation_scripts' ) );
@@ -216,8 +205,8 @@ class TBTestimonials
     function post_update_messages( $m )
     {
         global $post;
-
-        $m['testimonial'] = array(
+        $post_type = apply_filters( 'tbtestimonials_post_type', $this->post_type );
+        $m[ $post_type ] = array(
             0 => '', // Unused. Messages start at index 1.
             1 => sprintf( 'Testimonial updated. <a href="%s">View testimonial</a>', esc_url( get_permalink( $post->ID ) ) ),
             2 => 'Custom field updated.',
@@ -258,7 +247,7 @@ class TBTestimonials
     function add_meta_boxes()
     {
         if( function_exists( 'add_meta_box' ) ){
-            add_meta_box( 'tbtestimonial-company', 'Company Information', array( &$this, 'company_info' ), 'testimonial', 'normal', 'low' );
+            add_meta_box( 'tbtestimonial-company', 'Company Information', array( &$this, 'company_info' ), apply_filters( 'tbtestimonials_post_type', $this->post_type ), 'normal', 'low' );
         }
     }
 
@@ -287,7 +276,7 @@ class TBTestimonials
         if( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
             return $id;
 
-        if( 'testimonial' == $_POST['post_type'] )
+        if( apply_filters( 'tbtestimonials_post_type', $this->post_type ) == $_POST['post_type'] )
         {
             if( ! current_user_can( 'edit_page', $id ) )
                 return $id;
@@ -330,7 +319,7 @@ class TBTestimonials
     {
         global $wp_query;
         $post_type = $wp_query->query_vars['post_type'];
-        if( $post_type == 'testimonial' )
+        if( $post_type == apply_filters( 'tbtestimonials_post_type', $this->post_type ) )
         {
             if( ! have_posts() )
             {
@@ -347,7 +336,7 @@ class TBTestimonials
 
             $posts = $wp_query->posts;
             $ID = $posts[0]->ID;
-            $testimonial = get_posts( array( 'id' => $ID, 'post_type' => 'testimonial' ) );
+            $testimonial = get_posts( array( 'id' => $ID, 'post_type' => apply_filters( 'tbtestimonials_post_type', $this->post_type ) ) );
             if ( ! $testimonial )
             {
                 if ( $template = get_404_template() )
@@ -402,6 +391,8 @@ class TBTestimonials
     */
     function shortcode( $atts )
     {
+        $this->post_type = apply_filters( 'tbtestimonials_post_type', $this->post_type );
+
         extract(
             shortcode_atts(
                 array(
@@ -418,16 +409,14 @@ class TBTestimonials
         {
             if( strtolower( $id ) == 'all' ) # all testimonials
             {
-                $q = new WP_Query( array( 'post_type' => 'testimonial', 'post_status' => 'publish', 'posts_per_page' => '-1', 'orderby' => $orderby, 'order' => $order ) );
+                $q = new WP_Query( array( 'post_type' => $this->post_type, 'post_status' => 'publish', 'posts_per_page' => '-1', 'orderby' => $orderby, 'order' => $order ) );
 
                 if( $q->have_posts() )
                 {
                     $return = '<div id="tbtestimonial-listing">';
                     while( $q->have_posts() ){
                         $q->the_post();
-                        isset( $this->settings['use_template_api'] ) ?
-                            $return .= $this->prepare_testimonial( is_null( $template ) ? 'listing' : $template ) :
-                            $return .= $this->deprecated__prepare_testimonial( 'shortcode-all' );
+                        $return .= $this->prepare_testimonial( is_null( $template ) ? 'listing' : $template );
                     }
                     $return .= '</div>';
                 }
@@ -441,7 +430,7 @@ class TBTestimonials
             }
             elseif( strtolower( $id ) == 'random' || strtolower( $id ) == 'rand' ) # random testimonial
             {
-                $q = new WP_Query( array( 'post_type' => 'testimonial', 'post_status' => 'publish', 'orderby' => 'rand', 'posts_per_page' => 1 ) );
+                $q = new WP_Query( array( 'post_type' => $this->post_type, 'post_status' => 'publish', 'orderby' => 'rand', 'posts_per_page' => 1 ) );
 
                 if( $q->have_posts() )
                 {
@@ -449,9 +438,7 @@ class TBTestimonials
                     while( $q->have_posts() )
                     {
                         $q->the_post();
-                        isset( $this->settings['use_template_api'] ) ?
-                            $return .= $this->prepare_testimonial( is_null( $template ) ? 'listing' : $template ) :
-                            $return .= $this->deprecated__prepare_testimonial( 'shortcode-all' );
+                        $return .= $this->prepare_testimonial( is_null( $template ) ? 'listing' : $template );
                     }
                     wp_reset_query();
                     return $return . '</div>';
@@ -463,17 +450,16 @@ class TBTestimonials
             {
                 if( ! is_numeric( $id ) ) return;
 
-                $q = new WP_Query( array( 'p' => $id, 'post_type' => 'testimonial', 'post_status' => 'publish' ) );
+                $q = new WP_Query( array( 'p' => $id, 'post_type' => $this->post_type, 'post_status' => 'publish' ) );
                 if( $q->have_posts() )
                 {
                     $return = '';
                     while( $q->have_posts() )
                     {
                         $q->the_post();
-                        return isset( $this->settings['use_template_api'] ) ?
-                            $this->prepare_testimonial( is_null( $template ) ? 'shortcode' : $template ) :
-                            $this->deprecated__prepare_testimonial( 'shortcode-single' );
+                        $return .= $this->prepare_testimonial( is_null( $template ) ? 'shortcode' : $template );
                     }
+	                return $return;
                 }
                 else
                     return;
@@ -482,7 +468,7 @@ class TBTestimonials
         else if( ! is_null( $id ) && ! is_null( $cat ) && strtolower( $id ) == 'random' || strtolower( $id ) == 'rand' ) # random from category
         {
             $q = new WP_Query( array(
-                'post_type' => 'testimonial',
+                'post_type' => $this->post_type,
                 'post_status' => 'publish',
                 'orderby' => 'rand',
                 'posts_per_page' => 1,
@@ -495,9 +481,7 @@ class TBTestimonials
                 while( $q->have_posts() )
                 {
                     $q->the_post();
-                    isset( $this->settings['use_template_api'] ) ?
-                        $return .= $this->prepare_testimonial( is_null( $template ) ? 'listing' : $template ) :
-                        $return .= $this->deprecated__prepare_testimonial( 'shortcode-all' );
+                    $return .= $this->prepare_testimonial( is_null( $template ) ? 'listing' : $template );
                 }
                 wp_reset_query();
                 return $return . '</div>';
@@ -508,7 +492,7 @@ class TBTestimonials
         else if( is_null( $id ) && ! is_null( $cat ) ) # category listing
         {
             $q = new WP_Query( array(
-                'post_type' => 'testimonial',
+                'post_type' => $this->post_type,
                 'post_status' => 'publish',
                 'posts_per_page' => '-1',
                 'testimonial_category' => $cat,
@@ -522,9 +506,7 @@ class TBTestimonials
                 while( $q->have_posts() )
                 {
                     $q->the_post();
-                    isset( $this->settings['use_template_api'] ) ?
-                        $return .= $this->prepare_testimonial( is_null( $template ) ? 'listing' : $template ) :
-                        $return .= $this->deprecated__prepare_testimonial( 'shortcode-all' );
+                    $return .= $this->prepare_testimonial( is_null( $template ) ? 'listing' : $template );
                 }
                 wp_reset_query();
                 return $return . '</div>';
@@ -549,7 +531,8 @@ class TBTestimonials
     * load documentation page
     *
     */
-    function documentation_page(){
+    function documentation_page()
+    {
         tbtestimonials_load_template( 'documentation' );
     }
 
@@ -559,10 +542,12 @@ class TBTestimonials
     */
     function syntax_page()
     {
-        if( ! isset( $this->settings['use_template_api'] ) )
-            tbtestimonials_load_template( 'syntax-settings' );
-        else
-            tbtestimonials_load_template( 'syntax-settings-api' );
+        tbtestimonials_load_template( 'syntax-settings-api' );
+    }
+
+    public function import_testimonials_page()
+    {
+        tbtestimonials_load_template( 'import-testimonials' );
     }
 
     /**
@@ -607,7 +592,7 @@ class TBTestimonials
             $replacements = array(
                 get_permalink(),
                 $thumbnail,
-                apply_filters( 'the_content', get_the_content() ),
+                do_shortcode( get_the_content() ),
                 $this->settings['author_prefix'],
                 get_the_title(),
                 get_post_meta( get_the_ID(), 'tbtestimonial_company_url', 1 ),
@@ -733,23 +718,11 @@ class TBTestimonials
         $parser = '["parsexml.js"]';
         $styles = '["'.$css_url.'xmlcolors.css"]';
 
-        if( ! isset( $this->settings['use_template_api'] ) )
-        {
-            $templates = array(
-                'testimonial-syntax',
-                'testimonial-syntax-shortcode',
-                'testimonial-syntax-listing'
-            );
-        }
-        else
-        {
-            $templates = array();
-            foreach( $this->templates as $obj )
-                $templates[] = sanitize_title( $obj->name() );
+        $templates = array();
+        foreach( $this->templates as $obj )
+            $templates[] = sanitize_title( $obj->name() );
 
-            $templates[] = 'new-template-syntax';
-        }
-
+        $templates[] = 'new-template-syntax';
         ?>
             <script type="text/javascript">
                 <?php $x = 0; foreach( $templates as $template ) : ?>
@@ -862,7 +835,7 @@ class TBTestimonials
         if( isset( $post ) )
         {
             switch( $post->post_type ){
-                case 'testimonial' :
+                case $this->post_type :
                     if( $translation == 'Enter title here' )
                         return 'Testimonial Author';
                     break;
@@ -899,7 +872,7 @@ class TBTestimonials
         wp_register_script( 'tbt_documentation', plugins_url( 'inc/js/documentation.js', __FILE__ ), array( 'jquery-ui-tabs' ), '1.0' );
 
         # code mirror
-        if( $pagenow == 'edit.php' && isset( $_GET['post_type'] ) && $_GET['post_type'] == 'testimonial' && isset( $_GET['page'] ) && $_GET['page'] == 'tbtestimonials-syntax-settings' ){
+        if( $pagenow == 'edit.php' && isset( $_GET['post_type'] ) && $_GET['post_type'] == $this->post_type && isset( $_GET['page'] ) && $_GET['page'] == 'tbtestimonials-output-templates' ){
             wp_enqueue_script( 'CodeMirror', plugins_url( 'inc/js/codemirror.js', __FILE__ ), array(), '1.0' );
             add_action ('admin_footer', array( &$this, 'add_codemirror' ) );
         }
@@ -938,7 +911,7 @@ class TBTestimonials
 
     /**
     * check if template api exists
-    *
+    * @todo think of a better name for this method, right now it sucks.
     */
     public function template_api_exists(){
         return get_option( 'tbt_templates' );
@@ -958,6 +931,12 @@ class TBTestimonials
         return $templates;
     }
 
+    /**
+    * switch any case of the old style template tags (%tag%) over to the twig style tags ( {{ tag }} or {% tag %} )
+    *
+    * @param mixed $template
+    * @return mixed
+    */
     public function switch_to_twig_tags( $template )
     {
         $template = preg_replace( array( '/(%if(.+?)%)/', '/(?:[^{>"]?)(%([^ if](.*?)[^"])%)/' ), array( "{% if $2 %}", "{{ $2 }}" ), $template );
@@ -965,6 +944,10 @@ class TBTestimonials
         return $template;
     }
 
+    /**
+    * get output templates
+    *
+    */
     public function get_templates()
     {
         # check for template system api, update if not present
@@ -981,7 +964,7 @@ class TBTestimonials
     * @param mixed $description
     * @param mixed $syntax
     */
-    public function add_template( $name, $description, $syntax )
+    public function add_template( $name, $description = '', $syntax = '' )
     {
         $exists = array_key_exists( sanitize_title( $name ), $this->templates );
 
@@ -1007,9 +990,7 @@ class TBTestimonials
                     unset( $this->templates[ sanitize_title( $name ) ] );
                     return true;
                 }
-                return false;
             }
-            return false;
         }
         return false;
     }
@@ -1051,8 +1032,8 @@ function tbtestimonial( $id = false, $cat = false, $template = 'shortcode', $ech
         $q = new WP_Query( array( 'post_type' => 'testimonial', 'post_status' => 'publish', 'orderby' => $orderby, 'order' => $order, 'posts_per_page' => -1 ) );
     elseif( is_numeric( $id ) && ! $cat )
         $q = new WP_Query( array( 'p' => (int)$id, 'post_type' => 'testimonial', 'post_status' => 'publish' ) );
-    elseif( is_numeric( $id ) && $cat )
-        $q = new WP_Query( array( 'testimonial_category' => $id, 'post_type' => 'testimonial', 'post_status' => 'publish' ) );
+    elseif( is_string( $id ) && $cat )
+        $q = new WP_Query( array( 'testimonial_category' => $id, 'post_type' => 'testimonial', 'post_status' => 'publish', 'orderby' => $orderby, 'order' => $order ) );
     else
         return false;
 
@@ -1061,10 +1042,7 @@ function tbtestimonial( $id = false, $cat = false, $template = 'shortcode', $ech
         while( $q->have_posts() )
         {
             $q->the_post();
-            if( isset( $tbtestimonials->settings['use_template_api'] ) )
                 $output = sprintf( '<div class="tbtestimonial">%s</div>', $tbtestimonials->prepare_testimonial( sanitize_title( $template ) ) );
-            else
-                $output = sprintf( '<div class="tbtestimonial">%s</div>', $tbtestimonials->deprecated__prepare_testimonial( 'shortcode-single' ) );
         }
 
         $output = apply_filters( 'tbtestimonials_single_syntax', $output );

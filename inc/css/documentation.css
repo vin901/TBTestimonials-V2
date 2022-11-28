@@ -16,7 +16,9 @@ textarea { padding:10px; border:1px solid #dfdfdf; margin-bottom:40px; font-size
 #tbt-documentation-tabs #tabs li { padding: 9px 20px 10px 20px; border:1px solid #ccc; float:left; display:inline; margin:0 10px 0 0; font-size:1.6em!important; position:relative; top:1px; font-family:Georgia,"Times New Roman","Bitstream Charter",Times,serif; background:#ececec url(../i/button_off.png) bottom left repeat-x; }
 #tbt-documentation-tabs #tabs li a { text-decoration:none; }
 #tbt-documentation-tabs #tabs .ui-tabs-selected { border-bottom:none; background-color:white; background-image:none; top:1px; border-top:3px solid #666; }
+#tbt-documentation-tabs #tabs .ui-state-active { border-bottom:none; background-color:white; background-image:none; top:1px; border-top:3px solid #666; }
 #tbt-documentation-tabs #tabs .ui-tabs-selected a { color:#333; text-decoration:none; text-shadow:#fff -1px -1px 1px; }
+#tbt-documentation-tabs #tabs .ui-state-active a { color:#333; text-decoration:none; text-shadow:#fff -1px -1px 1px; }
 
 /* output settings stuff */
 #template-name,
@@ -44,3 +46,7 @@ textarea { padding:10px; border:1px solid #dfdfdf; margin-bottom:40px; font-size
 .CodeMirror-wrapping { background-color:white; }
 #examples code { background-color:white; padding:20px; border:1px solid #dfdfdf; display:block; max-height: 250px; overflow:auto; }
 #examples { padding-bottom:20px; }
+
+#tbt-tag-listing { overflow:auto; }
+#tbt-tag-listing .l { width:25%; float:left; }
+#tbt-tag-listing .r { width:75%; float:left; }

@@ -13,10 +13,11 @@ class TBTestimonialsWidget extends WP_Widget
     * widget construct
     *
     */
-    function TBTestimonialsWidget(){
+    function TBTestimonialsWidget()
+    {
         global $tbtestimonials;
         parent::WP_Widget( false, $name = 'TB Testimonials Widget' );
-        $this->post_type = $tbtestimonials->post_type;
+        $this->post_type = apply_filters( 'tbtestimonials_post_type', $tbtestimonials->post_type );
     }
 
     /**
@@ -39,9 +40,7 @@ class TBTestimonialsWidget extends WP_Widget
         $instance['order'] = esc_html( $new_instance['order'] );
         $instance['orderby'] = esc_html( $new_instance['orderby'] );
         $instance['transition'] = esc_html( $new_instance['transition'] );
-
-        if( isset( $tbtestimonials->settings['use_template_api'] ) )
-            $instance['template'] = esc_html( $new_instance['template'] );
+        $instance['template'] = esc_html( $new_instance['template'] );
 
         $x = 0;
         $categories = array();
@@ -50,11 +49,20 @@ class TBTestimonialsWidget extends WP_Widget
         {
             if( isset( $new_instance[ 'category_' . ++$x ] ) && ! empty( $new_instance[ 'category_' . $x ] ) )
             {
-                if( isset( $instance[ 'category_' . $x ] ) ) unset( $instance[ 'category_' . $x ] );
+                if( isset( $instance[ 'category_' . $x ] ) )
+                {
+	                unset( $instance[ 'category_' . $x ] );
+                }
+
                 $instance[ 'categories' ][ 'category_' . $x ] = esc_html( $new_instance[ 'category_' . $x ] );
             }
             else
-                if( isset( $instance['categories'][ 'category_' . $x ] ) ) unset( $instance['categories'][ 'category_' . $x ] );
+            {
+                if( isset( $instance['categories'][ 'category_' . $x ] ) )
+                {
+	                unset( $instance['categories'][ 'category_' . $x ] );
+                }
+            }
         }
 
         return $instance;
@@ -102,16 +110,14 @@ class TBTestimonialsWidget extends WP_Widget
                 <input class="widefat" id="<?php echo $this->get_field_id( 'transition_interval' ); ?>" name="<?php echo $this->get_field_name( 'transition_interval' ); ?>" type="text" value="<?php echo isset( $instance['transition_interval'] ) ? $instance['transition_interval'] : 1; ?>" />
             </label>
         </p>
-        <?php if( isset( $tbtestimonials->settings['use_template_api'] ) ) : ?>
-            <p>
-                <label for="<?php echo $this->get_field_id( 'template' ); ?>"><?php _e( 'Output Template:' ); ?></label>
-                <select name="<?php echo $this->get_field_name( 'template' ); ?>" id="<?php echo $this->get_field_id; ?>" class="widefat">
-                    <?php foreach( $tbtestimonials->templates as $template_id => $template ) : ?>
-                        <option value="<?php echo $template_id; ?>" <?php selected( $template_id, $instance['template'] ); ?> ><?php echo $template->name(); ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </p>
-        <?php endif; ?>
+        <p>
+            <label for="<?php echo $this->get_field_id( 'template' ); ?>"><?php _e( 'Output Template:' ); ?></label>
+            <select name="<?php echo $this->get_field_name( 'template' ); ?>" id="<?php echo $this->get_field_id; ?>" class="widefat">
+                <?php foreach( $tbtestimonials->templates as $template_id => $template ) : ?>
+                    <option value="<?php echo $template_id; ?>" <?php selected( $template_id, $instance['template'] ); ?> ><?php echo $template->name(); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </p>
         <p>
             <?php if( ! isset( $instance['loop_all'] ) ) $instance['loop_all'] = 'true'; ?>
             <label for="<?php echo $this->get_field_id( 'loop_all' ); ?>">
@@ -264,10 +270,6 @@ class TBTestimonialsWidget extends WP_Widget
 
         if( $testimonials->have_posts() )
         {
-            # fixes a bug where random testimonials are not random. 10/29/2012
-            if( $testimonial_args['orderby'] == 'rand' )
-                shuffle( $testimonials->posts );
-
             $tbtestimonials = new TBTestimonials();
 
             if( isset( $tbtestimonials_settings['show_loading_graphic'] ) ) : ?>
@@ -287,10 +289,7 @@ class TBTestimonialsWidget extends WP_Widget
             while( $testimonials->have_posts() )
             {
                 $testimonials->the_post();
-                if( isset( $tbtestimonials->settings['use_template_api'] ) )
-                    $t[] = $tbtestimonials->prepare_testimonial( $instance['template'] );
-                else
-                    $t[] = $tbtestimonials->deprecated__prepare_testimonial( 'widget' );
+                $t[] = $tbtestimonials->prepare_testimonial( $instance['template'] );
             }
 
             if( intval( $instance['display_count'] ) > 0 )

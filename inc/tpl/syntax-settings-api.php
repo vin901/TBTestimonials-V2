@@ -38,7 +38,7 @@
     }
 ?>
 <div class="wrap">
-    <h2>TBTestimonials Output Templates</h2>
+    <h2>TB-Testimonials Output Templates</h2>
 
     <div id="tbt-documentation-tabs">
         <ul id="tabs">
@@ -55,7 +55,7 @@
                         <?php wp_nonce_field( 'tbt-template-nonce', 'tbestimonials_template_nonce' ); ?>
 
                         <p style="width:800px;">
-                            You can edit an existing output template or create a new one using the <a href="http://twig.sensiolabs.org/doc/templates.html" rel="external">Twig Template Syntax</a>. There are a variety of included tags for you to utilze in your templates that are listed below. If you need more tags, you can add a new tag or function to the API easily. See the Documentation for examples.
+                            You can edit an existing output template or create a new one using the <a target="_blank" href="http://twig.sensiolabs.org/doc/templates.html" rel="external">Twig Template Syntax</a>. There are a variety of included tags for you to utilze in your templates that are listed below. If you need more tags, you can add a new tag or function to the API easily. See the Documentation for examples.
                         </p>
 
                         <table class="form-table">
@@ -105,13 +105,61 @@
             </div>
             <div class="tab-content new-template-wrap" id="tags"style="padding-bottom:20px">
                 <p>All templates have default tags that can be used in them. Alternatively, you can register new tags to use in your templates if needed. See the <a href="<?php echo admin_url( 'edit.php?post_type=testimonial&page=tbtestimonials-documentation#examples' ); ?>">Documentation</a> page for more details.</p>
-                <h3>Default Tags</h3>
-                <?php $tags = array( 'permalink', 'gravatar', 'testimonial', 'author_prefix', 'author', 'company_url', 'company_name', 'testimonial_excerpt' ); ?>
-                <ul>
-                    <?php foreach( $tags as $t ) : ?>
-                        <li>{{ <?php echo $t; ?> }}</li>
-                    <?php endforeach; ?>
-                </ul>
+                <div id="tbt-tag-listing">
+                    <div class="l">
+                        <h3>Default Tags</h3>
+                        <?php $tags = array( 'permalink', 'gravatar', 'testimonial', 'author_prefix', 'author', 'company_url', 'company_name', 'testimonial_excerpt' ); ?>
+                        <ul>
+                            <?php foreach( $tags as $t ) : ?>
+                                <li><code>{{ <?php echo $t; ?> }}</code></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                    <div class="r">
+                        <?php
+                            do_action( 'tbt_template_functions', $tbtestimonials->twig );
+                            $globals = $tbtestimonials->twig->getGlobals();
+
+                            if( count( $globals ) > 0 ) : ?>
+                                <h3>User Defined Tags</h3>
+                                <ul>
+                                    <?php foreach( $globals as $tag => $value ) : ?>
+                                        <?php
+                                            $type = 'variable';
+                                            $example = sprintf( '{{ %s }}', $tag );
+                                        ?>
+                                        <li>
+                                            <?php echo $tag; ?> -
+                                            <?php
+                                                if( is_array( $value ) ) {
+                                                    $type = 'array';
+                                                    $example = sprintf( "{%% for x in %s %%}    /* do something with {{ x }} */    {%% endfor %%}", $tag );
+                                                }
+                                                if( is_object( $value ) ) {
+                                                    $type = 'object';
+                                                    $example = '';
+                                                }
+                                            ?>
+
+                                            <strong><?php echo ucwords( $type ); ?></strong>
+                                            <?php if( ! empty( $example ) ) : ?>
+                                                - <code><?php echo $example; ?></code>
+                                            <?php endif; ?>
+
+                                            <?php if( $type == 'object' ) : ?>
+                                                <ul style="margin-left:40px;">
+                                                    <?php foreach( $value as $property => $property_value ) : ?>
+                                                        <li><code><?php printf( '{{ %s.%s }}', $tag, $property ); ?></code></li>
+                                                    <?php endforeach; ?>
+                                                </ul>
+                                            <?php endif; ?>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            <?php endif;
+                        ?>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

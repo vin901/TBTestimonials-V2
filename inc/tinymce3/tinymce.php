@@ -37,7 +37,8 @@
          * @desc add buttons to editor
          * @return void
          */
-        function addbuttons() {
+        function addbuttons()
+        {
             // Don't bother doing this stuff if the current user lacks permissions
             if ( !current_user_can('edit_posts') && !current_user_can('edit_pages') )
                 return;

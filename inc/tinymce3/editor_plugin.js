@@ -18,7 +18,7 @@
                 ed.windowManager.open({
                     file : 'admin-ajax.php?action=tbtestimonials-shortcode',
                     width : 360 + ed.getLang('tbtestimonials.delta_width', 0),
-                    height : 285 + ed.getLang('tbtestimonials.delta_height', 0),
+                    height : 385 + ed.getLang('tbtestimonials.delta_height', 0),
                     inline : 1
                 }, {
                     plugin_url : url // Plugin absolute URL

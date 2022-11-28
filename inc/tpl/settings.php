@@ -4,23 +4,12 @@
     global $tbtestimonials;
 ?>
 <div class="wrap">
-    <h2>TBTestimonials Settings</h2>
+    <h2>TB-Testimonials Settings</h2>
     <?php if( isset( $_GET['updated'] ) && $_GET['updated'] == 'true' ) : ?>
         <div class="updated fade"><p>Settings saved.</p></div>
     <?php endif; ?>
     <form action="options.php" method="post">
         <?php settings_fields( 'tbtestimonials_settings' ); ?>
-        <div style="margin:10px 0 40px; border:1px solid #dfdfdf; padding:10px 20px 20px; background-color:#ffffdf;">
-            <h2>Template API</h2>
-            <p>The Template API introduced in verison 1.6.0 offers a lot more flexibility to customize the output of your testimonials thanks to <a href="http://twig.sensiolabs.org/">Twig</a>. There's a new syntax for template tags and conditionals but it's similar and way more powerful.<br />
-            <em>This option will be removed in future versions and users will be forced to use the new syntax. I'm giving you the option to switch now on your own before making it mandatory. This will also help work out any bugs if there are any.</em></p>
-            <table class="form-table">
-                <tr>
-                    <th><label for="use_template_api"><strong>Enable Template API</strong></label></th>
-                    <td><input type="checkbox" name="tbtestimonials_settings[use_template_api]" id="use_template_api" <?php if( isset( $tbtestimonials_settings['use_template_api'] ) ) checked( 1, 1 ); ?> /></td>
-                </tr>
-            </table>
-        </div>
         <h3>General Settings</h3>
         <table class="form-table">
             <tr>

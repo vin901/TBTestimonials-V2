@@ -3,7 +3,7 @@
     $tbtestimonials_settings = tbtestimonials_settings();
 ?>
 <div class="wrap">
-    <h2>TBTestimonials Output Settings</h2>
+    <h2>TB-Testimonials Output Settings</h2>
 
     <?php if( isset( $_GET['updated'] ) && $_GET['updated'] == 'true' ) : ?>
         <div class="updated fade"><p>Settings saved.</p></div>

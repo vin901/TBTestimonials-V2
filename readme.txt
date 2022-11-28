@@ -1,24 +1,20 @@
-=== TBTestimonials-V2 ===
-Contributors: vin901, ansimation
-Donate link: http://visitfloridastateparks.com/donate/
+=== TBTestimonials ===
+Contributors: ansimation
+Donate link: http://travisballard.com/donate/
 Tags: testimonial, testimonials, quote, quotes, business, client, customer, testimony, reference, ajax, widget, testimonial widget, custom post type
 Requires at least: 3.0
-Tested up to: 3.4
-Stable tag: 1.6.1
-Requires PHP: 7.0
-License: GPLv2 or later
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Tested up to: 3.6
+Stable tag: 1.7.3
 
-Testimonial Management done right with Custom Post Types. Supports a testimonial.php template file for single testimonial pages. Testimonial Shortcode to insert testimonials in any post or page. Animated Sidebar Widget, Built in documentation and code examples. Customize output and tons of other options!
+Powerful Testimonial Management. Create and use custom Output Templates anywhere on your site. Use the shortcode, function, or included widget to display your testimonials to your users.
 
 == Description ==
 
-Testimonial Management done right with Custom Post Types. Supports a testimonial.php template file for single testimonial pages. Testimonial Shortcode to insert testimonials in any post or page. Animated Sidebar Widget, Built in documentation and code examples. Customize output and tons of other options!
+Powerful Testimonial Management. Create and use custom Output Templates anywhere on your site. Use the shortcode, function, or included widget to display your testimonials to your users.
 -
-That description isn't too helpful for the non-WordPress geek, so let me translate.
 This plugin lets you manage testimonials as a separate type of information in your WordPress blog, which makes it easier to include them in other blog posts and pages.
 
-Less geeky description by Jacob Share :)
+Less technical description by Jacob Share :)
 
 == Installation ==
 
@@ -42,11 +38,45 @@ This section describes how to install the plugin and get it working.
 1. Main testimonial listing
 2. Add a testimonial page
 3. General Plugin Settings
-4. Plugin Output Settings
+4. Output Templates
+5. Template Tags
+6. Create New Template
+7. Documentation
 
 == Changelog ==
 
-= 1.6..1 =
+= 1.7.3 =
+* Fixes bug in shortcode output where a single ID is used. - Thanks Kai!
+* Fixes bug in widget where new users after 7.0 was released could not change output template due to legacy api code.
+
+= 1.7.2 =
+* Fixes a bug in tbtestimonial() function where category names being passed do not work correctly because of is_numeric conditional
+
+= 1.7.1 =
+* Fixes bug in widget when not previously using the optional (now mandatory) template API introduced in 1.6
+
+= 1.7 =
+* Removed option to switch to template api. It is now active by default.
+* Added list of user defined tags to the "tags" tab on the Output Templates page. Should make remembering your custom tags a little easier. Especially if you have a few of them.
+* New shortcode generator in TinyMCE with more options.
+* Fixed a few bugs that are present when using a filtered post type
+* Removed TBar to make users "happy happy happy". Merry Christmas, Jon.
+
+= 1.6.5 =
+* 1.6.4 was a bust and the filter did not work. This solves that as well as changing it in the shortcode generator popup window.
+* Changed references of the post type to refer to a single variable in the event of a post type conflict later on down the road.
+* Added filter for post type so it can be changed in the event of a conflict.
+
+= 1.6.4 =
+* Added filter to change the shortcode in the event of a conflict.
+
+= 1.6.3 =
+* Fixed CSS issue with selected tabs in admin area. 3.5 Changed class names to ui-state-active instead of ui-tabs-selected.
+
+= 1.6.2 =
+* Added TBar - Promotional Tool for newly launched Travis Ballard Design
+
+= 1.6.1 =
 * fixed bug in single shortcode output
 * added order and orderby attributes to the shortcode and tbtestimonial() function
 * added option to show a random testimonial from a category. thanks to powderflask ( http://wordpress.org/support/profile/powderflask ) for the patch.
@@ -165,9 +195,3 @@ This section describes how to install the plugin and get it working.
 
 = 1.0 =
 * Initial Import of plugin
-
-
-== Upgrade Notice ==
-
-= 1.6.1 =
-* Works with WordPress 6.1.1

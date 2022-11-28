@@ -1,7 +1,7 @@
 <?php global $tbtestimonials; ?>
 <div class="wrap">
-    <h2>TBTestimonials Documentation</h2>
-    <p style="width:800px;">This is a small documentation I've put together for you guys and gals on a temporary basis until I get a chance to redo my website. I'll explain some hooks and filters that are available to developers as well as how to use some of the default functionality offered by the plugin.</p>
+    <h2>TB-Testimonials Documentation</h2>
+    <p style="width:800px;">This is a small documentation I've put together for you guys and gals. I'll explain some hooks and filters that are available to you as well as how to use some of the default functionality offered by the plugin.</p>
     <p style="width:800px;">This documentation is in no way shape or form complete. You will see changes to the documentation as different versions of the plugin are completed and released. It may even also be removed in the future.</p>
 
     <div class="shameless-plugs">
@@ -81,7 +81,7 @@
                             <dt>ID</dt>
                             <dd>The ID parameter is not required <small>(<code>[testmonial]</code>)</small>.<br />If absent we will assume random. Aside from a numeric ID for a testimonial you can pass one of these strings, "all", "rand", or "random"</dd>
                             <dt>Template</dt>
-                            <dd>The template parameter is not required and if missing will default to the "shortcode" template as defined in the <a href="<?php echo admin_url( 'edit.php?post_type=testimonial&page=tbtestimonials-syntax-settings' ); ?>">Output Settings</a></dd>
+                            <dd>The template parameter is not required and if missing will default to the "shortcode" template as defined in the <a href="<?php echo admin_url( sprintf( 'edit.php?post_type=%s&page=tbtestimonials-output-templates', apply_filters( 'tbtestimonials_post_type', $tbtestimonials->post_type ) ) ); ?>">Output Templates</a></dd>
                             <dt>Order</dt>
                             <dd>The order parameter is not required and defaults to desc if absent. Valid values are: ASC, DESC</dd>
                             <dt>OrderBy</dt>
@@ -99,7 +99,7 @@
                                 <em>The ID argument can not be used while using the cat argument. If it is, cat will be ignored.</em>
                             </dd>
                             <dt>Template</dt>
-                            <dd>The template parameter is not required and if missing will default to the "listing" template as defined in the <a href="<?php echo admin_url( 'edit.php?post_type=testimonial&page=tbtestimonials-syntax-settings' ); ?>">Output Settings</a></dd>
+                            <dd>The template parameter is not required and if missing will default to the "listing" template as defined in the <a href="<?php echo admin_url( sprintf( 'edit.php?post_type=%s&page=tbtestimonials-output-templates', apply_filters( 'tbtestimonials_post_type', $tbtestimonials->post_type ) ) ); ?>">Output Templates</a></dd>
                             <dt>Order</dt>
                             <dd>The order parameter is not required and defaults to desc if absent. Valid values are: ASC, DESC</dd>
                             <dt>OrderBy</dt>
@@ -135,8 +135,11 @@
                     <dt>tbt_template_functions</dt>
                     <dd><strong>Hook</strong> for adding new tags. See Examples Tab for an example.</dd>
 
-                    <dt>tbt_testimonial_shortcode</dt>
-                    <dd><strong>Hook</strong> for changing the default shortcode from 'testimonial' to something else.</dd>
+                    <dt>tbtestimonials_shortcode</dt>
+                    <dd>Filter for changing the shortcode.</dd>
+
+                    <dt>tbtestimonials_post_type</dt>
+                    <dd>Filter for changing the post type.</dd>
 
 
                 </dl>
@@ -152,24 +155,7 @@ function add_custom_preloaders( $preloaders ){
 }<?php highlight_string( "<?php \n\n" . ob_get_clean() ); ?>
                 </div>
 
-                <?php if( ! isset( $tbtestimonials->settings['use_template_api'] ) ) : ?>
-                    <div class="example" id="add_deprecated_template_tags">
-                        <h4>Add new template tags. <span style="color:#666; font-weight:normal;">( Enable the new Template API on the <a href="<?php echo admin_url( 'edit.php?post_type=testimonial&page=tbtestimonials-settings' ); ?>">General Settings</a> page then come back to view examples using the new tbt_template_functions hook. )</span></h4>
-                        <?php ob_start(); ?>add_filter( 'tbtestimonials_template_tags', 'add_featured_image_to_testimonials_template_tags' );
-add_filter( 'tbtestimonials_template_tag_replacements', 'add_featured_image_to_testimonials_template_replacements' );
 
-function add_featured_image_to_testimonials_template_tags( $t ){
-    return array_merge( array( '%featured_image%' ), $t );
-}
-
-function add_featured_image_to_testimonials_template_replacements( $r ){
-    add_image_size( 'my_testimonial_thumbnail_size', 75, 75, 1 );
-    return array_merge( array( get_the_post_thumbnail( null, 'my_testimonial_thumbnail_size' ) ), $r );
-}
-
-<?php highlight_string( "<?php \n\n" . ob_get_clean() ); ?>
-                    </div>
-                <?php else : ?>
                     <div class="example" id="add_template_tags">
                         <h4>Add new template tags : Procedural Example</h4>
                         <?php ob_start(); ?>add_action( 'tbt_template_functions', 'add_tags_to_tbtestimonials' );
@@ -180,8 +166,8 @@ function add_featured_image_to_testimonials_template_replacements( $r ){
 * @param mixed $twig
 */
 function add_tags_to_tbtestimonials( $twig ){
-    $twig->addGlobal( 'foobar', call_user_func( 'foobar_func' ) );
-    $twig->addGlobal( 'foo', call_user_func( 'foo_func' ) );
+    $twig->addGlobal( 'foobar', @call_user_func( 'foobar_func' ) );
+    $twig->addGlobal( 'foo', @call_user_func( 'foo_func' ) );
 }
 
 /**
@@ -236,7 +222,6 @@ $instance = new MyClass();
 
 <?php highlight_string( "<?php \n\n" . ob_get_clean() ); ?>
                     </div>
-                <?php endif; ?>
             </div>
         </div>
     </div>
